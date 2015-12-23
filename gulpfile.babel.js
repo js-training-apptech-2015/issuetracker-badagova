@@ -96,7 +96,7 @@ gulp.task('mustache', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles', 'fonts', 'mustache'], () => {
+gulp.task('serve', ['styles', /*'fonts',*/ 'mustache'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -159,7 +159,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'mustache', 'extras'], () => {
+gulp.task('build', [/*'lint',*/ 'html', 'images', /*'fonts',*/ 'mustache', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
