@@ -8,7 +8,8 @@
 	  code: '',
       issues: ''
 	}
-  });	
+  });
+	
   var Issue = Backbone.Model.extend({
 	defaults: {
 	  id: '',
@@ -18,42 +19,87 @@
     }
   });
 	
-  var IssueCollection = Backbone.Collection.extend({
+  var IssueCollection = Backbone.Collection.extend();/*{
 	  //collection: Issue,
 	  initialize: function (projectId) {
 		 this.collection = new IssueCollection(projectCollection.findWhere({id: projectId}).get("issues"));
 	  }
-  });
+  });*/
 	
   var ProjectCollection = Backbone.Collection.extend({
 	model: Project,
 	url: 'http://www.mocky.io/v2/567a37162500001045af0238',
 	initialize: function () {
-	  this.fetch();
+	  //this.reset(Project);
+	  this.comparator = function (prj) {
+		  return prj.get('id');
+	  };
 	},
   });
 	
-  var projectCollection = new ProjectCollection();/*[
-	{
-	  _id: '1',
-	  name: 'test', 
-	  code: 'jsfnfkdnfl'
+  var projectCollection = new ProjectCollection(); 
+	/*projectCollection.reset();[
+    {
+	  "id": "1",
+	  "name": "test", 
+	  "code": "jsfnfkdnfl",
+      "issues":[
+          {
+            "id": "11",
+            "projectId": "1",
+            "name": "bug1",
+            "detail": "Everything is very bad"
+          },
+          {
+            "id": "12",
+            "projectId": "1",
+            "name": "bug2",
+            "detail": "Everything doesn't work"
+          }
+        ]
 	},
 	  
 	{
-	  _id: '2',
-	  name: 'test2',
-	  code: 'dklkfmjlkfd'
+	  "id": "2",
+      "name": "test2", 
+	  "code": "dklkfmjlkfd",
+      "issues":[
+          {
+            "id": "21",
+            "projectId": "2",
+            "name": "bug1",
+            "detail": "Everything is very bad"
+          },
+          {
+            "id": "22",
+            "projectId": "2",
+            "name": "bug2",
+            "detail": "Everything doesn't work"
+          }
+        ]
 	},
 	  
 	{
-	  _id: '3',
-	  name: 'test3',
-	  code: 'dlkflkdjlkfj'
+	  "id": "3",
+      "name": "test3", 
+	  "code": "dlkflkdjlkfj",
+      "issues":[
+          {
+            "id": "31",
+            "projectId": "3",
+            "name": "bug1",
+            "detail": "Everything is very bad"
+          },
+          {
+            "id": "32",
+            "projectId": "3",
+            "name": "bug2",
+            "detail": "Everything doesn't work"
+          }
+        ]
 	}
-  ]);*/
+]);*/
 	
-  // alert(project.get('name'));
   var TemplateView = Backbone.View.extend({
     render: function () {
       var template = templates[this.template];
@@ -68,10 +114,10 @@
     template: 'main',
     render: function () {
       TemplateView.prototype.render.call(this);
-      this.menuView = new MenuView({
-		  el: this.$(".menu")
+      this.projectListView = new ProjectListView({
+		  el: this.$(".main")
 	  });
-	  this.menuView.render();
+	  this.projectListView.render();
     }
   });
 
@@ -91,19 +137,17 @@
 
   var IssueListView = TemplateView.extend({
     template: 'issues-list',
-//	model: IssueCollection,
     getContext: function () {
-	  var prjID = this.collection.at(1).get("projectId");
+	 // var prjID = this.collection.at(0).get("projectId");
       return {
 		issues: this.collection.toJSON(),
-		projectName: projectCollection.get(prjID).get("name")
+		//project: projectCollection.get(prjID).get("name")
 	  }
     }
   });
 
 	var IssueView = TemplateView.extend({
     template: 'issue-detail',
-//	model: IssueCollection,
     getContext: function () {
       return {
 		issue: this.model.toJSON()
@@ -123,37 +167,34 @@
 	routes: {
 	  '': 'start',
 	  '/': 'start',
-	  'projects': 'projects',
-	  'projects/:project': 'issues',
-	  'projects/:project/:issue': 'issueDetail'
+	  'project:id': 'issues',
+	  'project:id/issue:issueID': 'issueDetail'
 	}, 
 	 
 	start: function(){
-	  var mainView = new MainView({
-        el: $('#application')
-      });
-      mainView.render();
-	},
-	
-	projects: function(){
-	  MainView.projectListView = new ProjectListView({
-        el: $('.main')
-      });
-      MainView.projectListView.render();  
+	  
+	  projectCollection.fetch({
+		success: function () {
+		  var mainView = new MainView({
+            el: $('#application')
+          });
+          mainView.render();
+	    }
+	  });
 	},
 	  
-	issues: function (project){
+	issues: function (id){
 	  MainView.issuesListView = new IssueListView({
 	    el: $('.main'),
-	    collection: new Backbone.Collection(projectCollection.findWhere({name: project}).get("issues"))
+	    collection: new IssueCollection (projectCollection.get(id).get("issues"))
 	  });
       MainView.issuesListView.render();
 	},
 	
-	issueDetail: function(project, issue){
+	issueDetail: function(id, issueID){
 	  MainView.issueView = new IssueView({
 	    el: $('.main'),
-	    model: new Backbone.Collection(projectCollection.findWhere({name: project}).get("issues")).findWhere({name: issue})
+	    model: new Issue (_.findWhere(projectCollection.get(id).get("issues"), {id: issueID}))
 	  });
       MainView.issueView.render();
     }
