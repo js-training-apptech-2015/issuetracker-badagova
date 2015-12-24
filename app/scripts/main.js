@@ -19,7 +19,10 @@
   });
 	
   var IssueCollection = Backbone.Collection.extend({
-	  model: Issue
+	  //collection: Issue,
+	  initialize: function (projectId) {
+		 this.collection = new IssueCollection(projectCollection.findWhere({id: projectId}).get("issues"));
+	  }
   });
 	
   var ProjectCollection = Backbone.Collection.extend({
@@ -66,7 +69,7 @@
     render: function () {
       TemplateView.prototype.render.call(this);
       this.menuView = new MenuView({
-		  el: this.$(".menu-list")
+		  el: this.$(".menu")
 	  });
 	  this.menuView.render();
     }
@@ -78,23 +81,36 @@
 	
   var ProjectListView = TemplateView.extend({
     template: 'project-list',
-	model: projectCollection,
+	collection: projectCollection,
 	getContext: function () {
       return {
-		projects: this.model.toJSON()
+		projects: this.collection.toJSON()
       }
     }
   });
 
-  /*var IssueListView = TemplateView.extend({
-    template: 'issue-list',
-	model: IssueCollection,
+  var IssueListView = TemplateView.extend({
+    template: 'issues-list',
+//	model: IssueCollection,
+    getContext: function () {
+	  var prjID = this.collection.at(1).get("projectId");
+      return {
+		issues: this.collection.toJSON(),
+		projectName: projectCollection.get(prjID).get("name")
+	  }
+    }
+  });
+
+	var IssueView = TemplateView.extend({
+    template: 'issue-detail',
+//	model: IssueCollection,
     getContext: function () {
       return {
-		issues: this.model.toJSON()
+		issue: this.model.toJSON()
       }
     }
-  });*/
+  });
+
 	
   /*$(function () {
     var mainView = new MainView({
@@ -106,9 +122,10 @@
   var Router = Backbone.Router.extend({
 	routes: {
 	  '': 'start',
+	  '/': 'start',
 	  'projects': 'projects',
-	  ':project': 'issues',
-	  ':project/:issue': 'issueDetail'
+	  'projects/:project': 'issues',
+	  'projects/:project/:issue': 'issueDetail'
 	}, 
 	 
 	start: function(){
@@ -119,22 +136,27 @@
 	},
 	
 	projects: function(){
-	  
-   	  MainView.projectListView = new ProjectListView({
-        el: $('.js-project-list')
+	  MainView.projectListView = new ProjectListView({
+        el: $('.main')
       });
-      MainView.projectListView.render();
-	    
+      MainView.projectListView.render();  
 	},
 	  
 	issues: function (project){
-	 // MainView.issuesListView = new IssueListView(projectCollection.get(project.id).issues);
-      //MainView.issuesListView.render();
+	  MainView.issuesListView = new IssueListView({
+	    el: $('.main'),
+	    collection: new Backbone.Collection(projectCollection.findWhere({name: project}).get("issues"))
+	  });
+      MainView.issuesListView.render();
 	},
 	
 	issueDetail: function(project, issue){
-	  
-  }
+	  MainView.issueView = new IssueView({
+	    el: $('.main'),
+	    model: new Backbone.Collection(projectCollection.findWhere({name: project}).get("issues")).findWhere({name: issue})
+	  });
+      MainView.issueView.render();
+    }
   });
   var router = new Router();	
   Backbone.history.start();
