@@ -4,6 +4,7 @@ import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
+import webpack from 'gulp-webpack';
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -160,9 +161,31 @@ gulp.task('wiredep', () => {
 });
 
 gulp.task('build', [/*'lint',*/ 'html', 'images', /*'fonts',*/ 'mustache', 'extras'], () => {
-  return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
+  //return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
+	return gulp.src('*/app/scripts/main.js')
+		.pipe(webpack(require('./webpack.config.js')))
+		.pipe(gulp.dest('dist/scripts/'))
+		.pipe($.size({title: 'build', gzip: true}));
 });
 
 gulp.task('default', ['clean'], () => {
   gulp.start('build');
+});
+
+gulp.task("webpack-dev-server", function(callback) {
+    // Start a webpack-dev-server
+    var compiler = webpack({
+        // configuration
+    });
+
+    new WebpackDevServer(compiler, {
+        // server and middleware options
+    }).listen(8080, "localhost", function(err) {
+        if(err) throw new gutil.PluginError("webpack-dev-server", err);
+        // Server listening
+        gutil.log("[webpack-dev-server]", "http://localhost:8080/webpack-dev-server/index.html");
+
+        // keep the server alive or continue?
+        // callback();
+    });
 });
