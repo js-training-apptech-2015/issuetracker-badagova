@@ -3,4 +3,4 @@
 var Router = require ("./Router");
 
 var router = new Router();	
-Backbone.history.start();
+Backbone.history.start();//{pushState: true});

@@ -5,6 +5,10 @@ import browserSync from 'browser-sync';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
 import webpack from 'gulp-webpack';
+import WebpackDevServer from 'webpack-dev-server';
+
+var wpConfig = require('./webpack.config.js');
+//var compiler = webpack(wpConfig);
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -102,12 +106,14 @@ gulp.task('serve', ['styles', /*'fonts',*/ 'mustache'], () => {
     notify: false,
     port: 9000,
     server: {
-      baseDir: ['.tmp', 'app'],
+      baseDir: ['.tmp', 'dist'],
       routes: {
         '/bower_components': 'bower_components'
       }
     }
   });
+  
+  //gulp.watch('app/scripts/**/*.js').on('change', compiler);
 
   gulp.watch([
     'app/*.html',
@@ -123,7 +129,7 @@ gulp.task('serve', ['styles', /*'fonts',*/ 'mustache'], () => {
   gulp.watch('bower.json', ['wiredep', 'fonts']);
 });
 
-gulp.task('serve:dist', () => {
+/*gulp.task('serve:dist', () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -132,7 +138,7 @@ gulp.task('serve:dist', () => {
     }
   });
 });
-
+*/
 gulp.task('serve:test', () => {
   browserSync({
     notify: false,
@@ -163,9 +169,14 @@ gulp.task('wiredep', () => {
 gulp.task('build', [/*'lint',*/ 'html', 'images', /*'fonts',*/ 'mustache', 'extras'], () => {
   //return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 	return gulp.src('*/app/scripts/main.js')
-		.pipe(webpack(require('./webpack.config.js')))
+		.pipe(webpack(wpConfig))
 		.pipe(gulp.dest('dist/scripts/'))
 		.pipe($.size({title: 'build', gzip: true}));
+});
+
+gulp.task("webpack", function() {
+    // run webpack
+    webpack(wpConfig);
 });
 
 gulp.task('default', ['clean'], () => {
@@ -173,19 +184,10 @@ gulp.task('default', ['clean'], () => {
 });
 
 gulp.task("webpack-dev-server", function(callback) {
-    // Start a webpack-dev-server
-    var compiler = webpack({
-        // configuration
-    });
-
     new WebpackDevServer(compiler, {
         // server and middleware options
     }).listen(8080, "localhost", function(err) {
-        if(err) throw new gutil.PluginError("webpack-dev-server", err);
-        // Server listening
-        gutil.log("[webpack-dev-server]", "http://localhost:8080/webpack-dev-server/index.html");
-
-        // keep the server alive or continue?
-        // callback();
+      //  if(err) throw new gutil.PluginError("webpack-dev-server", err);
+        //gutil.log("[webpack-dev-server]", "http://localhost:8080/webpack-dev-server/index.html");
     });
 });
