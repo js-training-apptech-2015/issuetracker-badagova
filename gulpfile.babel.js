@@ -101,7 +101,7 @@ gulp.task('mustache', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles', /*'fonts',*/ 'mustache'], () => {
+gulp.task('serve', ['styles', 'fonts', 'mustache'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -113,8 +113,6 @@ gulp.task('serve', ['styles', /*'fonts',*/ 'mustache'], () => {
     }
   });
   
-  //gulp.watch('app/scripts/**/*.js').on('change', compiler);
-
   gulp.watch([
     'app/*.html',
     'app/scripts/**/*.js',
@@ -166,7 +164,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', [/*'lint',*/ 'html', 'images', /*'fonts',*/ 'mustache', 'extras'], () => {
+gulp.task('build', [/*'lint',*/ 'html', 'images', 'fonts', 'mustache', 'extras'], () => {
   //return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 	return gulp.src('*/app/scripts/main.js')
 		.pipe(webpack(wpConfig))
@@ -174,20 +172,12 @@ gulp.task('build', [/*'lint',*/ 'html', 'images', /*'fonts',*/ 'mustache', 'extr
 		.pipe($.size({title: 'build', gzip: true}));
 });
 
-gulp.task("webpack", function() {
+gulp.task('webpack', function() {
     // run webpack
     webpack(wpConfig);
 });
 
 gulp.task('default', ['clean'], () => {
   gulp.start('build');
-});
-
-gulp.task("webpack-dev-server", function(callback) {
-    new WebpackDevServer(compiler, {
-        // server and middleware options
-    }).listen(8080, "localhost", function(err) {
-      //  if(err) throw new gutil.PluginError("webpack-dev-server", err);
-        //gutil.log("[webpack-dev-server]", "http://localhost:8080/webpack-dev-server/index.html");
-    });
+  gulp.start('serve');
 });

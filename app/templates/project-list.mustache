@@ -1,5 +1,7 @@
-<ul class="nav nav-tabs nav-stacked">
+<div class="list-group">
   {{#projects}}
-    <li><a href="#/project{{id}}" class="projects">{{name}}</a></li>
+    <a href="#/project{{id}}" class="list-group-item">{{name}}</a>
   {{/projects}}
-</ul>
+  	<a href="#" class="list-group-item">
+		<span class="glyphicon glyphicon-plus"></span> Add new project</a>
+</div>
