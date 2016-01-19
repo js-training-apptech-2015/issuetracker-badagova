@@ -1,6 +1,18 @@
 <div>
-  {{#issue}}
+  <div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+	  Actions 
+	  <span class="caret"></span>
+	</button>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#">Resolved</a></li>
+	  <li><a href="#">Not resolved</a></li>
+    </ul>
+  </div>
+    {{#issue}}
   <h3>{{name}}</h3>
-  <p>{{detail}}<p>
-  {{/issue}}
+  <pre>
+    <p>{{detail}}</p>
+  </pre>
+    {{/issue}}
 </div>
